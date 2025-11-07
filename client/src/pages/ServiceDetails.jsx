@@ -39,8 +39,7 @@ const ServiceDetails = () => {
     try {
       const bookingPayload = {
         service: id,
-        date: bookingData.date,
-        time: bookingData.time,
+        bookingStart: new Date(`${bookingData.date}T${bookingData.time}`).toISOString(),
         duration: bookingData.duration,
         address: bookingData.address,
         message: bookingData.message

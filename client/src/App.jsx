@@ -14,9 +14,11 @@ import PrivateRoute from './components/auth/PrivateRoute'
 import ServiceDetails from './pages/ServiceDetails'
 
 // Import service provider pages
-import ServiceProviderServices from './pages/ServiceProviderServices'
+import MyServices from './pages/MyServices'
 import ProviderBookings from './pages/ProviderBookings'
 import ProviderReviews from './pages/ProviderReviews'
+import MarketplaceItemDetails from './pages/MarketplaceItemDetails'
+import CreateMarketplaceItem from './pages/CreateMarketplaceItem'
 
 function App() {
   return (
@@ -35,9 +37,11 @@ function App() {
                 <Route path="/feed" element={<PrivateRoute><Feed /></PrivateRoute>} />
                 <Route path="/services" element={<PrivateRoute><Services /></PrivateRoute>} />
                 <Route path="/marketplace" element={<PrivateRoute><Marketplace /></PrivateRoute>} />
+                <Route path="/marketplace/:id" element={<PrivateRoute><MarketplaceItemDetails /></PrivateRoute>} />
+                <Route path="/marketplace/new" element={<PrivateRoute><CreateMarketplaceItem /></PrivateRoute>} />
                 
                 {/* Service Provider Routes */}
-                <Route path="/my-services" element={<PrivateRoute><ServiceProviderServices /></PrivateRoute>} />
+                <Route path="/my-services" element={<PrivateRoute><MyServices /></PrivateRoute>} />
                 <Route path="/my-bookings" element={<PrivateRoute><ProviderBookings /></PrivateRoute>} />
                 <Route path="/my-reviews" element={<PrivateRoute><ProviderReviews /></PrivateRoute>} />
 

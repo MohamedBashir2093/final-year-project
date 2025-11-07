@@ -9,6 +9,9 @@ import User from '../models/User.js';
 export const createBooking = asyncHandler(async (req, res) => {
   const { service: serviceId, date, time, duration, address, message } = req.body;
 
+  // Combine date and time into a single ISO 8601 timestamp
+  const bookingStart = new Date(`${date}T${time}`).toISOString();
+
   // Get service and verify it exists
   const service = await Service.findById(serviceId);
   if (!service) {
@@ -34,8 +37,7 @@ export const createBooking = asyncHandler(async (req, res) => {
   // Check provider availability
   const isAvailable = await Booking.checkAvailability(
     service.provider,
-    date,
-    time,
+    bookingStart,
     duration
   );
 
@@ -51,8 +53,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     service: serviceId,
     user: req.user.id,
     provider: service.provider,
-    date,
-    time,
+    bookingStart,
     duration: duration || 1,
     totalPrice,
     address,
