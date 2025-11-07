@@ -16,13 +16,9 @@ const bookingSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  date: {
+  bookingStart: {
     type: Date,
-    required: [true, 'Please add a booking date']
-  },
-  time: {
-    type: String,
-    required: [true, 'Please add a booking time']
+    required: [true, 'Please specify the booking start time']
   },
   duration: {
     type: Number, // in hours
@@ -76,38 +72,24 @@ bookingSchema.index({ service: 1, status: 1 });
 bookingSchema.index({ date: 1, time: 1 });
 
 // Static method to check for booking conflicts
-bookingSchema.statics.checkAvailability = async function(providerId, date, time, duration = 1) {
-  const bookingDate = new Date(date);
-  const [hours, minutes] = time.split(':').map(Number);
-  bookingDate.setHours(hours, minutes);
+bookingSchema.statics.checkAvailability = async function(providerId, bookingStart, duration = 1) {
+  const bookingStartDate = new Date(bookingStart);
 
-  const endTime = new Date(bookingDate);
-  endTime.setHours(bookingDate.getHours() + duration);
+  const bookingEndDate = new Date(bookingStartDate);
+  bookingEndDate.setHours(bookingStartDate.getHours() + duration);
 
   const conflictingBooking = await this.findOne({
     provider: providerId,
     status: { $in: ['confirmed', 'in_progress'] },
-    $or: [
-      {
-        date: bookingDate,
-        $and: [
-          { time: { $lte: time } },
-          { 
-            $expr: { 
-              $gte: [
-                { 
-                  $add: [
-                    { $toDate: { $concat: [{ $toString: "$date" }, "T", "$time", ":00"] } },
-                    { $multiply: ["$duration", 3600000] }
-                  ]
-                },
-                bookingDate
-              ]
-            }
-          }
-        ]
-      }
-    ]
+    bookingStart: {
+      $lt: bookingEndDate
+    },
+    $expr: {
+      $gt: [
+        { $add: ["$bookingStart", { $multiply: ["$duration", 60 * 60 * 1000] }] },
+        bookingStartDate
+      ]
+    }
   });
 
   return !conflictingBooking;
