@@ -5,7 +5,6 @@ const API = axios.create({
   withCredentials: true,                // optional, only if using cookies
 })
 
-
 // Request interceptor to add auth token
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
@@ -55,15 +54,20 @@ export const servicesAPI = {
   delete: (id) => API.delete(`/services/${id}`),
   getByProvider: (providerId) => API.get(`/services/provider/${providerId}`),
   addReview: (id, reviewData) => API.post(`/services/${id}/reviews`, reviewData),
+
+  // New method for provider dashboard
+  getMyServices: () => API.get('/services/my-services'),
 }
 
 export const bookingsAPI = {
   create: (bookingData) => API.post('/bookings', bookingData),
   getMyBookings: () => API.get('/bookings/my-bookings'),
-  getProviderBookings: () => API.get('/bookings/my-services'),
   getById: (id) => API.get(`/bookings/${id}`),
   updateStatus: (id, status) => API.put(`/bookings/${id}/status`, { status }),
   addReview: (id, reviewData) => API.post(`/bookings/${id}/review`, reviewData),
+
+  // New method for provider dashboard
+  getProviderBookings: () => API.get('/bookings/my-services'),
 }
 
 export const marketplaceAPI = {
@@ -75,5 +79,6 @@ export const marketplaceAPI = {
   getMyItems: () => API.get('/marketplace/my-items'),
   updateStatus: (id, status) => API.put(`/marketplace/${id}/status`, { status }),
 }
+
 
 export default API

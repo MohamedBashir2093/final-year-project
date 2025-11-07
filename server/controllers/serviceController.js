@@ -12,6 +12,7 @@ export const getServices = asyncHandler(async (req, res) => {
     minPrice,
     maxPrice,
     priceType,
+    provider,
     page = 1,
     limit = 10,
     sort = '-createdAt'
@@ -21,8 +22,8 @@ export const getServices = asyncHandler(async (req, res) => {
   let query = { isActive: true };
 
   // Category filter
-  if (category && category !== 'all') {
-    query.category = category;
+   if (provider) {
+    query.provider = provider;
   }
 
   // Search in title or description
@@ -251,3 +252,17 @@ export const addReview = asyncHandler(async (req, res) => {
     data: service.reviews
   });
 });
+export const getMyServices = asyncHandler(async (req, res) => {
+  const services = await Service.find({ provider: req.user.id })
+    .populate('provider', 'name avatar rating reviewCount')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: services.length,
+    data: services
+  });
+});
+
+
+

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom' // ✅ Added import
 import { servicesAPI } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Search, Filter, Star, MapPin, Clock, Plus } from 'lucide-react'
@@ -30,11 +31,16 @@ const Services = () => {
       if (selectedCategory !== 'all') filters.category = selectedCategory
       if (searchTerm) filters.search = searchTerm
       
+      if (user?.role === 'service_provider') {
+        filters.provider = user._id // Only show current provider's services
+      }
+      
       const response = await servicesAPI.getAll(filters)
-      setServices(response.data || []) // Fixed: response.data instead of direct array
+      console.log('Services for current user:', response.data)
+      setServices(response.data || [])
     } catch (error) {
       console.error('Error fetching services:', error)
-      setServices([]) // Ensure services is always an array
+      setServices([])
     } finally {
       setLoading(false)
     }
@@ -44,11 +50,15 @@ const Services = () => {
     fetchServices()
   }, [selectedCategory, searchTerm])
 
+  // ✅ Updated ServiceCard component with <Link>
   const ServiceCard = ({ service }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex space-x-4">
         <img
-          src={service.provider?.avatar || `https://ui-avatars.com/api/?name=${service.provider?.name}&background=3B82F6&color=fff`}
+          src={
+            service.provider?.avatar ||
+            `https://ui-avatars.com/api/?name=${service.provider?.name}&background=3B82F6&color=fff`
+          }
           alt={service.provider?.name}
           className="w-12 h-12 rounded-full"
         />
@@ -60,7 +70,7 @@ const Services = () => {
             </span>
           </div>
           <p className="text-gray-600 mb-3 line-clamp-2">{service.description}</p>
-          
+
           <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
             <div className="flex items-center space-x-1">
               <Star className="w-4 h-4 text-yellow-500 fill-current" />
@@ -78,14 +88,17 @@ const Services = () => {
 
           <div className="flex justify-between items-center">
             <div className="text-lg font-bold text-gray-900">
-              ${service.price} 
+              ${service.price}
               <span className="text-sm font-normal text-gray-500 ml-1">
                 {service.priceType === 'hourly' ? '/hour' : ' fixed'}
               </span>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              View Details
-            </button>
+            <Link
+              to={`/services/${service._id}`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              View Details & Book
+            </Link>
           </div>
         </div>
       </div>
@@ -129,7 +142,9 @@ const Services = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Local Services</h1>
-          <p className="text-gray-600 mt-2">Find trusted service providers in your neighborhood</p>
+          <p className="text-gray-600 mt-2">
+            Find trusted service providers in your neighborhood
+          </p>
         </div>
         {user?.role === 'service_provider' && (
           <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -149,7 +164,7 @@ const Services = () => {
               type="text"
               placeholder="Search services..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
           </div>
@@ -182,12 +197,13 @@ const Services = () => {
         {services.length === 0 && (
           <div className="text-center py-12">
             <Filter className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No services found</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No services found
+            </h3>
             <p className="text-gray-600">
-              {searchTerm || selectedCategory !== 'all' 
-                ? 'Try adjusting your search filters' 
-                : 'No services available yet'
-              }
+              {searchTerm || selectedCategory !== 'all'
+                ? 'Try adjusting your search filters'
+                : 'No services available yet'}
             </p>
           </div>
         )}

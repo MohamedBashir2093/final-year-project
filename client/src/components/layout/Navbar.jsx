@@ -1,14 +1,19 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Menu, X, Home, HeartHandshake, Store, User, LogOut } from 'lucide-react'
+import { Menu, X, Home, HeartHandshake, Store, User, LogOut, Calendar, Star, Settings } from 'lucide-react'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { user, logout } = useAuth()
   const location = useLocation()
 
-  const navItems = [
+  // Different nav items for residents vs service providers
+  const navItems = user?.role === 'service_provider' ? [
+    { path: '/my-services', icon: HeartHandshake, label: 'My Services' },
+    { path: '/my-bookings', icon: Calendar, label: 'Bookings' },
+    { path: '/my-reviews', icon: Star, label: 'Reviews' },
+  ] : [
     { path: '/feed', icon: Home, label: 'Feed' },
     { path: '/services', icon: HeartHandshake, label: 'Services' },
     { path: '/marketplace', icon: Store, label: 'Marketplace' },

@@ -6,6 +6,7 @@ import {
   updateService,
   deleteService,
   getServicesByProvider,
+  getMyServices,
   addReview
 } from '../controllers/serviceController.js';
 import { protect, authorize } from '../middleware/auth.js';
@@ -21,6 +22,7 @@ router.route('/:id')
   .put(protect, updateService)
   .delete(protect, deleteService);
 
+router.get('/my-services', protect, authorize('service_provider'), getMyServices);
 router.get('/provider/:providerId', getServicesByProvider);
 router.post('/:id/reviews', protect, addReview);
 

@@ -1,3 +1,8 @@
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { Search, Filter, MapPin, Heart, Share, Plus } from 'lucide-react';
+
+
 const Marketplace = () => {
   const [items, setItems] = useState([])
   const [filteredItems, setFilteredItems] = useState([])
