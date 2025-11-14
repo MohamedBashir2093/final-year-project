@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { postsAPI, servicesAPI, marketplaceAPI } from '../lib/api'
 import { Edit3, MapPin, Phone, Mail, Calendar, Star, Settings, LogOut } from 'lucide-react'
 
 const Profile = () => {
@@ -7,6 +8,10 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('posts')
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({})
+  const [posts, setPosts] = useState([])
+  const [services, setServices] = useState([])
+  const [listings, setListings] = useState([])
+  const [stats, setStats] = useState({ posts: 0, services: 0, itemsSold: 0, rating: 0 })
 
   useEffect(() => {
     if (user) {
@@ -22,8 +27,30 @@ const Profile = () => {
           zipCode: ''
         }
       })
+      fetchData()
     }
   }, [user])
+
+  const fetchData = async () => {
+    try {
+      const [postsRes, servicesRes, listingsRes] = await Promise.all([
+        postsAPI.getAll({ author: user._id }),
+        servicesAPI.getMyServices(),
+        marketplaceAPI.getMyItems(),
+      ]);
+      setPosts(postsRes.data);
+      setServices(servicesRes.data);
+      setListings(listingsRes.data);
+      setStats({
+        posts: postsRes.count,
+        services: servicesRes.count,
+        itemsSold: listingsRes.data.filter(i => i.status === 'sold').length,
+        rating: user.rating || 0
+      })
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  }
 
   const handleSave = async () => {
     try {
@@ -135,25 +162,25 @@ const Profile = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard
           title="Posts"
-          value="24"
+          value={stats.posts}
           icon={Edit3}
           color="bg-blue-500"
         />
         <StatsCard
           title="Services"
-          value="8"
+          value={stats.services}
           icon={Star}
           color="bg-green-500"
         />
         <StatsCard
           title="Items Sold"
-          value="12"
+          value={stats.itemsSold}
           icon={MapPin}
           color="bg-purple-500"
         />
         <StatsCard
           title="Rating"
-          value="4.8"
+          value={stats.rating}
           icon={Star}
           color="bg-yellow-500"
         />
@@ -183,10 +210,23 @@ const Profile = () => {
         {/* Tab Content */}
         <div className="p-6">
           {activeTab === 'posts' && (
-            <div className="text-center py-12">
-              <Edit3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-600">Posts you create will appear here.</p>
+            <div>
+              {posts.length > 0 ? (
+                <div className="space-y-4">
+                  {posts.map(post => (
+                    <div key={post._id} className="border p-4 rounded">
+                      <h4 className="font-bold">{post.title}</h4>
+                      <p>{post.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Edit3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
+                  <p className="text-gray-600">Posts you create will appear here.</p>
+                </div>
+              )}
             </div>
           )}
 

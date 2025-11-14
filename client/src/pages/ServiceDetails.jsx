@@ -4,6 +4,8 @@ import { servicesAPI, bookingsAPI } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Star, MapPin, Clock, User, ArrowLeft, Calendar, Clock as ClockIcon } from 'lucide-react'
 
+import ReviewFormModal from '../components/ReviewFormModal'
+
 const ServiceDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -11,6 +13,8 @@ const ServiceDetails = () => {
   const [service, setService] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showBookingForm, setShowBookingForm] = useState(false)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [canReview, setCanReview] = useState(false)
   const [bookingData, setBookingData] = useState({
     date: '',
     time: '',
@@ -21,7 +25,22 @@ const ServiceDetails = () => {
 
   useEffect(() => {
     fetchService()
-  }, [id])
+    checkBookingStatus()
+  }, [id, user])
+
+  const checkBookingStatus = async () => {
+    if (!user) return
+    try {
+      const response = await bookingsAPI.getMyBookings()
+      const userBookings = response.data || []
+      const completedBooking = userBookings.find(
+        (b) => b.service._id === id && b.status === 'completed'
+      )
+      setCanReview(!!completedBooking)
+    } catch (error) {
+      console.error('Error checking booking status:', error)
+    }
+  }
 
   const fetchService = async () => {
     try {
@@ -80,6 +99,17 @@ const ServiceDetails = () => {
     )
   }
 
+  const handleSaveReview = async (reviewData) => {
+    try {
+      await servicesAPI.addReview(id, reviewData)
+      fetchService() // Refresh service to show new review/rating
+      setShowReviewForm(false)
+      setCanReview(false) // User has now reviewed
+    } catch (error) {
+      console.error('Error saving review:', error)
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Back Button */}
@@ -120,6 +150,14 @@ const ServiceDetails = () => {
                 >
                   Book Now
                 </button>
+                {canReview && (
+                  <button
+                    onClick={() => setShowReviewForm(true)}
+                    className="mt-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                  >
+                    Leave a Review
+                  </button>
+                )}
               </div>
             </div>
 
@@ -245,6 +283,13 @@ const ServiceDetails = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {showReviewForm && (
+        <ReviewFormModal
+          onClose={() => setShowReviewForm(false)}
+          onSave={handleSaveReview}
+        />
       )}
     </div>
   )

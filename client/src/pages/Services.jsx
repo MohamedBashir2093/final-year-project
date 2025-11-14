@@ -9,6 +9,8 @@ const Services = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' })
+  const [rating, setRating] = useState(0)
   const { user } = useAuth()
 
   const categories = [
@@ -30,6 +32,9 @@ const Services = () => {
       const filters = {}
       if (selectedCategory !== 'all') filters.category = selectedCategory
       if (searchTerm) filters.search = searchTerm
+      if (priceRange.min) filters.minPrice = priceRange.min
+      if (priceRange.max) filters.maxPrice = priceRange.max
+      if (rating > 0) filters.minRating = rating
       
       // For residents, show all active services
       // For providers, show all services (they can see what others offer too)
@@ -47,7 +52,7 @@ const Services = () => {
 
   useEffect(() => {
     fetchServices()
-  }, [selectedCategory, searchTerm])
+  }, [selectedCategory, searchTerm, priceRange, rating])
 
   // ✅ Updated ServiceCard component with <Link>
   const ServiceCard = ({ service }) => (
@@ -155,35 +160,74 @@ const Services = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search services..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
+          <div className="md:col-span-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search services..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+            </div>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
-            {categories.map(category => (
-              <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                  selectedCategory === category.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
+          {/* Price Range */}
+          <div className="md:col-span-1">
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                placeholder="Min"
+                value={priceRange.min}
+                onChange={e => setPriceRange({ ...priceRange, min: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+              <span className="text-gray-500">-</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={priceRange.max}
+                onChange={e => setPriceRange({ ...priceRange, max: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+            </div>
           </div>
+
+          {/* Rating */}
+          <div className="md:col-span-1">
+            <div className="flex items-center space-x-2">
+              <span className="text-gray-700">Rating:</span>
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  onClick={() => setRating(star)}
+                  className={`text-2xl ${rating >= star ? 'text-yellow-500' : 'text-gray-300'}`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 mt-4">
+          {categories.map(category => (
+            <button
+              key={category.value}
+              onClick={() => setSelectedCategory(category.value)}
+              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                selectedCategory === category.value
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
         </div>
       </div>
 

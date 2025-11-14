@@ -98,6 +98,10 @@ export const createMarketplaceItem = asyncHandler(async (req, res) => {
   // Add user to req.body
   req.body.seller = req.user.id;
 
+  if (req.files) {
+    req.body.images = req.files.map(file => file.path);
+  }
+
   const item = await MarketplaceItem.create(req.body);
 
   await item.populate('seller', 'name avatar rating');

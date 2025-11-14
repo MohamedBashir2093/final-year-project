@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import serviceService from '../../services/serviceService';
+import ReviewsModal from '../../components/ReviewsModal';
 
 const MyServices = () => {
   const [services, setServices] = useState([]);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isReviewsModalOpen, setReviewsModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -111,6 +113,15 @@ const MyServices = () => {
                   >
                     Remove
                   </button>
+                  <button
+                    onClick={() => {
+                      setCurrentService(service);
+                      setReviewsModalOpen(true);
+                    }}
+                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition duration-200"
+                  >
+                    Reviews
+                  </button>
                 </div>
               </div>
             );
@@ -120,6 +131,7 @@ const MyServices = () => {
 
       {isAddModalOpen && <ServiceFormModal onClose={() => setAddModalOpen(false)} onSave={handleAddService} />}
       {isEditModalOpen && <ServiceFormModal onClose={() => setEditModalOpen(false)} onSave={handleUpdateService} service={currentService} />}
+      {isReviewsModalOpen && <ReviewsModal service={currentService} onClose={() => setReviewsModalOpen(false)} />}
     </div>
   );
 };

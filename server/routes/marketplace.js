@@ -12,9 +12,11 @@ import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
+import upload from '../middleware/fileUpload.js';
+
 router.route('/')
   .get(getMarketplaceItems)
-  .post(protect, createMarketplaceItem);
+  .post(protect, upload, createMarketplaceItem);
 
 router.get('/my-items', protect, getMyMarketplaceItems);
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Search, Filter, MapPin, Heart, Share, Plus } from 'lucide-react';
+import MarketplaceItemModal from "../components/MarketplaceItemModal";
+import { marketplaceAPI } from "../lib/api";
 
 
 const Marketplace = () => {
@@ -9,6 +11,7 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth()
 
   const categories = [
@@ -21,107 +24,30 @@ const Marketplace = () => {
     { value: 'other', label: 'Other' }
   ]
 
-  // Mock data - replace with actual API call
   useEffect(() => {
-    const mockItems = [
-      {
-        id: 1,
-        title: 'Vintage Wooden Chair',
-        description: 'Beautiful vintage wooden chair in excellent condition. Perfect for your living room or dining area.',
-        price: 45,
-        category: 'furniture',
-        image: 'https://images.unsplash.com/photo-1503602642458-232111445657?w=400&h=300&fit=crop',
-        seller: {
-          name: 'Sarah Johnson',
-          avatar: 'https://ui-avatars.com/api/?name=Sarah+Johnson&background=10B981&color=fff'
-        },
-        location: '2 blocks away',
-        date: '2024-01-15',
-        condition: 'Excellent'
-      },
-      {
-        id: 2,
-        title: 'Bicycle - Like New',
-        description: 'Mountain bike, barely used. Includes helmet and lock. Great for neighborhood rides.',
-        price: 120,
-        category: 'sports',
-        image: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&h=300&fit=crop',
-        seller: {
-          name: 'Mike Chen',
-          avatar: 'https://ui-avatars.com/api/?name=Mike+Chen&background=3B82F6&color=fff'
-        },
-        location: '5 blocks away',
-        date: '2024-01-14',
-        condition: 'Like New'
-      },
-      {
-        id: 3,
-        title: 'Bookshelf',
-        description: 'Solid wood bookshelf, 5 shelves. Perfect condition. Must pick up.',
-        price: 65,
-        category: 'furniture',
-        image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=300&fit=crop',
-        seller: {
-          name: 'Emma Davis',
-          avatar: 'https://ui-avatars.com/api/?name=Emma+Davis&background=8B5CF6&color=fff'
-        },
-        location: '3 blocks away',
-        date: '2024-01-13',
-        condition: 'Good'
-      },
-      {
-        id: 4,
-        title: 'iPhone 12 Pro',
-        description: '128GB, Pacific Blue. Includes original box and charger. Screen protector applied since day one.',
-        price: 450,
-        category: 'electronics',
-        image: 'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=400&h=300&fit=crop',
-        seller: {
-          name: 'Alex Rivera',
-          avatar: 'https://ui-avatars.com/api/?name=Alex+Rivera&background=EF4444&color=fff'
-        },
-        location: '4 blocks away',
-        date: '2024-01-12',
-        condition: 'Excellent'
-      },
-      {
-        id: 5,
-        title: 'Garden Tools Set',
-        description: 'Complete gardening tool set. Includes shovel, rake, gloves, and pruning shears.',
-        price: 35,
-        category: 'home',
-        image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop',
-        seller: {
-          name: 'David Wilson',
-          avatar: 'https://ui-avatars.com/api/?name=David+Wilson&background=F59E0B&color=fff'
-        },
-        location: '6 blocks away',
-        date: '2024-01-11',
-        condition: 'Good'
-      },
-      {
-        id: 6,
-        title: 'Designer Handbag',
-        description: 'Genuine leather handbag, barely used. Perfect condition with dust bag.',
-        price: 85,
-        category: 'clothing',
-        image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop',
-        seller: {
-          name: 'Sophia Martinez',
-          avatar: 'https://ui-avatars.com/api/?name=Sophia+Martinez&background=EC4899&color=fff'
-        },
-        location: '1 block away',
-        date: '2024-01-10',
-        condition: 'Like New'
-      }
-    ]
+    fetchItems();
+  }, []);
 
-    setTimeout(() => {
-      setItems(mockItems)
-      setFilteredItems(mockItems)
-      setLoading(false)
-    }, 1000)
-  }, [])
+  const fetchItems = async () => {
+    try {
+      const response = await marketplaceAPI.getAll();
+      setItems(response.data);
+      setFilteredItems(response.data);
+    } catch (error) {
+      console.error("Error fetching marketplace items:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveItem = async (formData) => {
+    try {
+      await marketplaceAPI.create(formData);
+      fetchItems();
+    } catch (error) {
+      console.error("Error creating marketplace item:", error);
+    }
+  };
 
   useEffect(() => {
     filterItems()
@@ -296,17 +222,18 @@ const Marketplace = () => {
             <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No items found</h3>
             <p className="text-gray-600 mb-6">
-              {searchTerm || selectedCategory !== 'all' 
-                ? 'Try adjusting your search filters' 
+              {searchTerm || selectedCategory !== 'all'
+                ? 'Try adjusting your search filters'
                 : 'Be the first to list an item in your neighborhood!'
               }
             </p>
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+            <button onClick={() => setIsModalOpen(true)} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
               List Your First Item
             </button>
           </div>
         )}
       </div>
+      {isModalOpen && <MarketplaceItemModal onClose={() => setIsModalOpen(false)} onSave={handleSaveItem} />}
     </div>
   )
 }
