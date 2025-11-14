@@ -10,9 +10,9 @@ const Navbar = () => {
 
   // Different nav items for residents vs service providers
   const navItems = user?.role === 'service_provider' ? [
-    { path: '/my-services', icon: HeartHandshake, label: 'My Services' },
-    { path: '/my-bookings', icon: Calendar, label: 'Bookings' },
-    { path: '/my-reviews', icon: Star, label: 'Reviews' },
+    { path: '/provider-dashboard/services', icon: HeartHandshake, label: 'My Services' },
+    { path: '/provider-dashboard/bookings', icon: Calendar, label: 'Bookings' },
+    { path: '/provider-dashboard/profile', icon: User, label: 'Profile' },
   ] : [
     { path: '/feed', icon: Home, label: 'Feed' },
     { path: '/services', icon: HeartHandshake, label: 'Services' },
