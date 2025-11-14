@@ -254,7 +254,7 @@ export const addReview = asyncHandler(async (req, res) => {
 });
 export const getMyServices = asyncHandler(async (req, res) => {
   console.log('Logged-in user:', req.user);
-  const services = await Service.find({ provider: req.user.id })
+  const services = await Service.find({ provider: req.user._id })
     .populate('provider', 'name avatar rating reviewCount')
     .sort({ createdAt: -1 });
 
