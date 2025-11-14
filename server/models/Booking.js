@@ -16,13 +16,9 @@ const bookingSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  date: {
+  bookingDateTime: {
     type: Date,
-    required: [true, 'Please add a booking date']
-  },
-  time: {
-    type: String,
-    required: [true, 'Please add a booking time']
+    required: [true, 'Please add a booking date and time']
   },
   duration: {
     type: Number, // in hours
@@ -33,10 +29,8 @@ const bookingSchema = new mongoose.Schema({
     required: true
   },
   address: {
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String
+    type: String,
+    required: [true, 'Please add a service address']
   },
   message: {
     type: String,
@@ -73,39 +67,28 @@ const bookingSchema = new mongoose.Schema({
 bookingSchema.index({ user: 1, createdAt: -1 });
 bookingSchema.index({ provider: 1, createdAt: -1 });
 bookingSchema.index({ service: 1, status: 1 });
-bookingSchema.index({ date: 1, time: 1 });
+bookingSchema.index({ bookingDateTime: 1 });
 
 // Static method to check for booking conflicts
-bookingSchema.statics.checkAvailability = async function(providerId, date, time, duration = 1) {
-  const bookingDate = new Date(date);
-  const [hours, minutes] = time.split(':').map(Number);
-  bookingDate.setHours(hours, minutes);
-
-  const endTime = new Date(bookingDate);
-  endTime.setHours(bookingDate.getHours() + duration);
+bookingSchema.statics.checkAvailability = async function(providerId, bookingDateTime, duration = 1) {
+  const startTime = new Date(bookingDateTime);
+  const endTime = new Date(startTime);
+  endTime.setHours(startTime.getHours() + duration);
 
   const conflictingBooking = await this.findOne({
     provider: providerId,
     status: { $in: ['confirmed', 'in_progress'] },
     $or: [
       {
-        date: bookingDate,
-        $and: [
-          { time: { $lte: time } },
-          { 
-            $expr: { 
-              $gte: [
-                { 
-                  $add: [
-                    { $toDate: { $concat: [{ $toString: "$date" }, "T", "$time", ":00"] } },
-                    { $multiply: ["$duration", 3600000] }
-                  ]
-                },
-                bookingDate
-              ]
-            }
-          }
-        ]
+        bookingDateTime: { $lt: endTime, $gte: startTime }
+      },
+      {
+        $expr: {
+          $and: [
+            { $lt: ['$bookingDateTime', endTime] },
+            { $gt: [{ $add: ['$bookingDateTime', { $multiply: ['$duration', 3600000] }] }, startTime] }
+          ]
+        }
       }
     ]
   });

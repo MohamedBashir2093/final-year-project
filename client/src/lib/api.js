@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api', // <-- backend URL
+  baseURL: 'http://localhost:5000', // Direct to backend
   withCredentials: true,                // optional, only if using cookies
 })
 
@@ -27,57 +27,57 @@ API.interceptors.response.use(
 )
 
 export const authAPI = {
-  login: (email, password) => API.post('/auth/login', { email, password }),
-  register: (userData) => API.post('/auth/register', userData),
-  getProfile: () => API.get('/auth/me'), // Fixed: Changed from /profile to /me
-  updateDetails: (userData) => API.put('/auth/updatedetails', userData),
-  updatePassword: (passwordData) => API.put('/auth/updatepassword', passwordData),
+  login: (email, password) => API.post('/api/auth/login', { email, password }),
+  register: (userData) => API.post('/api/auth/register', userData),
+  getProfile: () => API.get('/api/auth/me'), // Fixed: Changed from /profile to /me
+  updateDetails: (userData) => API.put('/api/auth/updatedetails', userData),
+  updatePassword: (passwordData) => API.put('/api/auth/updatepassword', passwordData),
 }
 
 export const postsAPI = {
-  getAll: (params = {}) => API.get('/posts', { params }),
-  create: (postData) => API.post('/posts', postData),
-  getById: (id) => API.get(`/posts/${id}`),
-  update: (id, postData) => API.put(`/posts/${id}`, postData),
-  delete: (id) => API.delete(`/posts/${id}`),
-  like: (id) => API.put(`/posts/${id}/like`),
-  unlike: (id) => API.put(`/posts/${id}/unlike`),
-  addComment: (id, comment) => API.post(`/posts/${id}/comment`, { text: comment }),
-  deleteComment: (id, commentId) => API.delete(`/posts/${id}/comment/${commentId}`),
+  getAll: (params = {}) => API.get('/api/posts', { params }),
+  create: (postData) => API.post('/api/posts', postData),
+  getById: (id) => API.get(`/api/posts/${id}`),
+  update: (id, postData) => API.put(`/api/posts/${id}`, postData),
+  delete: (id) => API.delete(`/api/posts/${id}`),
+  like: (id) => API.put(`/api/posts/${id}/like`),
+  unlike: (id) => API.put(`/api/posts/${id}/unlike`),
+  addComment: (id, comment) => API.post(`/api/posts/${id}/comment`, { text: comment }),
+  deleteComment: (id, commentId) => API.delete(`/api/posts/${id}/comment/${commentId}`),
 }
 
 export const servicesAPI = {
-  getAll: (filters = {}) => API.get('/services', { params: filters }),
-  create: (serviceData) => API.post('/services', serviceData),
-  getById: (id) => API.get(`/services/${id}`),
-  update: (id, serviceData) => API.put(`/services/${id}`, serviceData),
-  delete: (id) => API.delete(`/services/${id}`),
-  getByProvider: (providerId) => API.get(`/services/provider/${providerId}`),
-  addReview: (id, reviewData) => API.post(`/services/${id}/reviews`, reviewData),
+  getAll: (filters = {}) => API.get('/api/services', { params: filters }),
+  create: (serviceData) => API.post('/api/services', serviceData),
+  getById: (id) => API.get(`/api/services/${id}`),
+  update: (id, serviceData) => API.put(`/api/services/${id}`, serviceData),
+  delete: (id) => API.delete(`/api/services/${id}`),
+  getByProvider: (providerId) => API.get(`/api/services/provider/${providerId}`),
+  addReview: (id, reviewData) => API.post(`/api/services/${id}/reviews`, reviewData),
 
   // New method for provider dashboard
-  getMyServices: () => API.get('/services/my-services'),
+  getMyServices: () => API.get('/api/services/my-services'),
 }
 
 export const bookingsAPI = {
-  create: (bookingData) => API.post('/bookings', bookingData),
-  getMyBookings: () => API.get('/bookings/my-bookings'),
-  getById: (id) => API.get(`/bookings/${id}`),
-  updateStatus: (id, status) => API.put(`/bookings/${id}/status`, { status }),
-  addReview: (id, reviewData) => API.post(`/bookings/${id}/review`, reviewData),
+  create: (bookingData) => API.post('/api/bookings', bookingData),
+  getMyBookings: () => API.get('/api/bookings/my-bookings'),
+  getById: (id) => API.get(`/api/bookings/${id}`),
+  updateStatus: (id, status) => API.put(`/api/bookings/${id}/status`, { status }),
+  addReview: (id, reviewData) => API.post(`/api/bookings/${id}/review`, reviewData),
 
   // New method for provider dashboard
-  getProviderBookings: () => API.get('/bookings/my-services'),
+  getProviderBookings: () => API.get('/api/bookings/my-services'),
 }
 
 export const marketplaceAPI = {
-  getAll: (filters = {}) => API.get('/marketplace', { params: filters }),
-  create: (itemData) => API.post('/marketplace', itemData),
-  getById: (id) => API.get(`/marketplace/${id}`),
-  update: (id, itemData) => API.put(`/marketplace/${id}`, itemData),
-  delete: (id) => API.delete(`/marketplace/${id}`),
-  getMyItems: () => API.get('/marketplace/my-items'),
-  updateStatus: (id, status) => API.put(`/marketplace/${id}/status`, { status }),
+  getAll: (filters = {}) => API.get('/api/marketplace', { params: filters }),
+  create: (itemData) => API.post('/api/marketplace', itemData),
+  getById: (id) => API.get(`/api/marketplace/${id}`),
+  update: (id, itemData) => API.put(`/api/marketplace/${id}`, itemData),
+  delete: (id) => API.delete(`/api/marketplace/${id}`),
+  getMyItems: () => API.get('/api/marketplace/my-items'),
+  updateStatus: (id, status) => API.put(`/api/marketplace/${id}/status`, { status }),
 }
 
 

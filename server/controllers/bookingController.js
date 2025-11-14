@@ -7,7 +7,7 @@ import User from '../models/User.js';
 // @route   POST /api/bookings
 // @access  Private
 export const createBooking = asyncHandler(async (req, res) => {
-  const { service: serviceId, date, time, duration, address, message } = req.body;
+  const { service: serviceId, bookingDateTime, duration, address, message } = req.body;
 
   // Get service and verify it exists
   const service = await Service.findById(serviceId);
@@ -34,8 +34,7 @@ export const createBooking = asyncHandler(async (req, res) => {
   // Check provider availability
   const isAvailable = await Booking.checkAvailability(
     service.provider,
-    date,
-    time,
+    bookingDateTime,
     duration
   );
 
@@ -51,8 +50,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     service: serviceId,
     user: req.user.id,
     provider: service.provider,
-    date,
-    time,
+    bookingDateTime,
     duration: duration || 1,
     totalPrice,
     address,

@@ -31,9 +31,8 @@ const Services = () => {
       if (selectedCategory !== 'all') filters.category = selectedCategory
       if (searchTerm) filters.search = searchTerm
       
-      if (user?.role === 'service_provider') {
-        filters.provider = user._id // Only show current provider's services
-      }
+      // For residents, show all active services
+      // For providers, show all services (they can see what others offer too)
       
       const response = await servicesAPI.getAll(filters)
       console.log('Services for current user:', response.data)

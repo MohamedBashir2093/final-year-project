@@ -37,15 +37,15 @@ const ServiceDetails = () => {
   const handleBookService = async (e) => {
     e.preventDefault()
     try {
+      const dateTime = new Date(bookingData.date + 'T' + bookingData.time + ':00');
       const bookingPayload = {
         service: id,
-        date: bookingData.date,
-        time: bookingData.time,
+        bookingDateTime: dateTime.toISOString(),
         duration: bookingData.duration,
         address: bookingData.address,
         message: bookingData.message
       }
-      
+
       await bookingsAPI.create(bookingPayload)
       alert('Booking request sent successfully!')
       navigate('/my-bookings')

@@ -13,6 +13,10 @@ import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Specific routes before parameterized ones
+router.get('/my-services', protect, getMyServices);
+router.get('/provider/:providerId', getServicesByProvider);
+
 router.route('/')
   .get(getServices)
   .post(protect, authorize('service_provider'), createService);
@@ -22,8 +26,6 @@ router.route('/:id')
   .put(protect, updateService)
   .delete(protect, deleteService);
 
-router.get('/my-services', protect, authorize('service_provider'), getMyServices);
-router.get('/provider/:providerId', getServicesByProvider);
 router.post('/:id/reviews', protect, addReview);
 
 export default router;
