@@ -30,8 +30,10 @@ const MyServices = () => {
 
   const handleAddService = async (service) => {
     try {
-      await serviceService.createService(service);
-      fetchServices(); // Refetch to ensure consistency
+      const response = await serviceService.createService(service);
+      // Defensively access the new service data, whether it's nested or not
+      const newServiceData = response.data || response;
+      setServices((prevServices) => [newServiceData, ...prevServices]);
       setAddModalOpen(false);
     } catch (error) {
       console.error('Error adding service:', error);
@@ -40,8 +42,19 @@ const MyServices = () => {
 
   const handleUpdateService = async (service) => {
     try {
-      await serviceService.updateService(service._id || service.id, service);
-      fetchServices(); // Refetch to ensure consistency
+      const response = await serviceService.updateService(
+        service._id || service.id,
+        service
+      );
+      // Defensively access the updated service data
+      const updatedServiceData = response.data || response;
+      setServices((prevServices) =>
+        prevServices.map((s) =>
+          (s._id || s.id) === (updatedServiceData._id || updatedServiceData.id)
+            ? updatedServiceData
+            : s
+        )
+      );
       setEditModalOpen(false);
     } catch (error) {
       console.error('Error updating service:', error);
