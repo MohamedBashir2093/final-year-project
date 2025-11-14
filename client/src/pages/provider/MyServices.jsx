@@ -30,8 +30,9 @@ const MyServices = () => {
 
   const handleAddService = async (service) => {
     try {
-      await serviceService.createService(service);
-      fetchServices(); // Refetch to ensure consistency
+      const response = await serviceService.createService(service);
+      const newService = response.data; // The service is nested in the data property
+      setServices((prevServices) => [newService, ...prevServices]);
       setAddModalOpen(false);
     } catch (error) {
       console.error('Error adding service:', error);
@@ -40,8 +41,18 @@ const MyServices = () => {
 
   const handleUpdateService = async (service) => {
     try {
-      await serviceService.updateService(service._id || service.id, service);
-      fetchServices(); // Refetch to ensure consistency
+      const response = await serviceService.updateService(
+        service._id || service.id,
+        service
+      );
+      const updatedService = response.data; // The service is nested in the data property
+      setServices((prevServices) =>
+        prevServices.map((s) =>
+          (s._id || s.id) === (updatedService._id || updatedService.id)
+            ? updatedService
+            : s
+        )
+      );
       setEditModalOpen(false);
     } catch (error) {
       console.error('Error updating service:', error);
