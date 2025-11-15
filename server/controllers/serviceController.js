@@ -22,7 +22,11 @@ export const getServices = asyncHandler(async (req, res) => {
   let query = { isActive: true };
 
   // Category filter
-   if (provider) {
+  if (category) {
+    query.category = category;
+  }
+
+  if (provider) {
     query.provider = provider;
   }
 

@@ -98,6 +98,11 @@ export const createMarketplaceItem = asyncHandler(async (req, res) => {
   // Add user to req.body
   req.body.seller = req.user.id;
 
+  // Handle uploaded images
+  if (req.files && req.files.length > 0) {
+    req.body.images = req.files.map(file => `/uploads/${file.filename}`);
+  }
+
   const item = await MarketplaceItem.create(req.body);
 
   await item.populate('seller', 'name avatar rating');
@@ -220,5 +225,17 @@ export const updateItemStatus = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: item
+  });
+});
+
+// @desc    Get count of marketplace items by current user
+// @route   GET /api/marketplace/my-items/count
+// @access  Private
+export const getMyMarketplaceItemsCount = asyncHandler(async (req, res) => {
+  const count = await MarketplaceItem.countDocuments({ seller: req.user.id });
+
+  res.status(200).json({
+    success: true,
+    data: count
   });
 });

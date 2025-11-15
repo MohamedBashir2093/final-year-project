@@ -41,6 +41,12 @@ const marketplaceItemSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add at least one image']
   }],
+  quantity: {
+    type: Number,
+    required: [true, 'Please add a quantity'],
+    min: [0, 'Quantity cannot be negative'],
+    default: 1
+  },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -48,7 +54,7 @@ const marketplaceItemSchema = new mongoose.Schema({
   },
   location: {
     type: String,
-    required: [true, 'Please add a location']
+    
   },
   address: {
     street: String,

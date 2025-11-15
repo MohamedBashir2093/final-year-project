@@ -8,15 +8,19 @@ import {
   likePost,
   unlikePost,
   addComment,
-  deleteComment
+  deleteComment,
+  getMyPostsCount
 } from '../controllers/postController.js';
 import { protect } from '../middleware/auth.js';
+import { upload } from '../middleware/multer.js';
 
 const router = express.Router();
 
 router.route('/')
   .get(protect, getPosts)
-  .post(protect, createPost);
+  .post(protect, upload.single('image'), createPost);
+
+router.get('/my-posts/count', protect, getMyPostsCount);
 
 router.route('/:id')
   .get(protect, getPost)

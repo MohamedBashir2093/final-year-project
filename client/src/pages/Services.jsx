@@ -9,15 +9,25 @@ const Services = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [showMoreCategories, setShowMoreCategories] = useState(false)
   const { user } = useAuth()
 
-  const categories = [
+  const mainCategories = [
     { value: 'all', label: 'All Services' },
     { value: 'plumbing', label: 'Plumbing' },
     { value: 'electrical', label: 'Electrical' },
     { value: 'cleaning', label: 'Cleaning' },
     { value: 'tutoring', label: 'Tutoring' },
-    { value: 'gardening', label: 'Gardening' },
+    { value: 'gardening', label: 'Gardening' }
+  ]
+
+  const moreCategories = [
+    { value: 'carpentry', label: 'Carpentry' },
+    { value: 'painting', label: 'Painting' },
+    { value: 'moving', label: 'Moving' },
+    { value: 'pet_care', label: 'Pet Care' },
+    { value: 'beauty', label: 'Beauty' },
+    { value: 'fitness', label: 'Fitness' },
     { value: 'other', label: 'Other' }
   ]
 
@@ -52,25 +62,32 @@ const Services = () => {
   // ✅ Updated ServiceCard component with <Link>
   const ServiceCard = ({ service }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex space-x-4">
-        <img
-          src={
-            service.provider?.avatar ||
-            `https://ui-avatars.com/api/?name=${service.provider?.name}&background=3B82F6&color=fff`
-          }
-          alt={service.provider?.name}
-          className="w-12 h-12 rounded-full"
-        />
+      <div className="flex flex-col sm:flex-row sm:space-x-4">
+        <div className="flex items-center space-x-4 mb-4 sm:mb-0 sm:flex-shrink-0">
+          <img
+            src={
+              service.provider?.avatar ? `http://localhost:5000${service.provider.avatar}` : `https://ui-avatars.com/api/?name=${service.provider?.name}&background=3B82F6&color=fff`
+            }
+            alt={service.provider?.name}
+            className="w-12 h-12 rounded-full"
+          />
+          <div className="sm:hidden">
+            <h3 className="text-lg font-semibold text-gray-900">{service.title}</h3>
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full capitalize mt-1 inline-block">
+              {service.category}
+            </span>
+          </div>
+        </div>
         <div className="flex-1">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-semibold text-gray-900">{service.title}</h3>
-            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full capitalize">
+            <h3 className="text-lg font-semibold text-gray-900 hidden sm:block">{service.title}</h3>
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full capitalize hidden sm:block">
               {service.category}
             </span>
           </div>
           <p className="text-gray-600 mb-3 line-clamp-2">{service.description}</p>
 
-          <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+          <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-500 mb-3">
             <div className="flex items-center space-x-1">
               <Star className="w-4 h-4 text-yellow-500 fill-current" />
               <span>{service.rating || 'New'}</span>
@@ -85,7 +102,7 @@ const Services = () => {
             </div>
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 pt-3 border-t border-gray-100 sm:border-t-0 sm:pt-0">
             <div className="text-lg font-bold text-gray-900">
               ${service.price}
               <span className="text-sm font-normal text-gray-500 ml-1">
@@ -94,7 +111,7 @@ const Services = () => {
             </div>
             <Link
               to={`/services/${service._id}`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full sm:w-auto text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               View Details & Book
             </Link>
@@ -136,9 +153,9 @@ const Services = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Local Services</h1>
           <p className="text-gray-600 mt-2">
@@ -146,7 +163,7 @@ const Services = () => {
           </p>
         </div>
         {user?.role === 'service_provider' && (
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors self-start sm:self-auto">
             <Plus className="w-5 h-5" />
             <span>Add Service</span>
           </button>
@@ -169,20 +186,55 @@ const Services = () => {
           </div>
 
           {/* Category Filter */}
-          <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
-            {categories.map(category => (
+          <div className="flex flex-col space-y-3 md:flex-row md:space-y-0 md:space-x-2">
+            <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0">
+              {mainCategories.map(category => (
+                <button
+                  key={category.value}
+                  onClick={() => setSelectedCategory(category.value)}
+                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    selectedCategory === category.value
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
               <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                  selectedCategory === category.value
+                onClick={() => setShowMoreCategories(!showMoreCategories)}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors relative ${
+                  showMoreCategories
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {category.label}
+                More Services
+                <span className="ml-1">{showMoreCategories ? '▲' : '▼'}</span>
               </button>
-            ))}
+            </div>
+
+            {/* Expanded More Categories */}
+            {showMoreCategories && (
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 md:border-t-0 md:pt-0">
+                {moreCategories.map(category => (
+                  <button
+                    key={category.value}
+                    onClick={() => {
+                      setSelectedCategory(category.value);
+                      setShowMoreCategories(false);
+                    }}
+                    className={`px-3 py-2 rounded-lg whitespace-nowrap text-sm transition-colors ${
+                      selectedCategory === category.value
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000', // Direct to backend
+  baseURL: 'http://localhost:5000/', // Direct to backend
   withCredentials: true,                // optional, only if using cookies
 })
 
@@ -32,11 +32,29 @@ export const authAPI = {
   getProfile: () => API.get('/api/auth/me'), // Fixed: Changed from /profile to /me
   updateDetails: (userData) => API.put('/api/auth/updatedetails', userData),
   updatePassword: (passwordData) => API.put('/api/auth/updatepassword', passwordData),
+  updateAvatar: (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return API.put('/api/auth/me/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 }
 
 export const postsAPI = {
   getAll: (params = {}) => API.get('/api/posts', { params }),
-  create: (postData) => API.post('/api/posts', postData),
+  create: (postData) => {
+    if (postData instanceof FormData) {
+      return API.post('/api/posts', postData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+    return API.post('/api/posts', postData);
+  },
   getById: (id) => API.get(`/api/posts/${id}`),
   update: (id, postData) => API.put(`/api/posts/${id}`, postData),
   delete: (id) => API.delete(`/api/posts/${id}`),
@@ -44,6 +62,7 @@ export const postsAPI = {
   unlike: (id) => API.put(`/api/posts/${id}/unlike`),
   addComment: (id, comment) => API.post(`/api/posts/${id}/comment`, { text: comment }),
   deleteComment: (id, commentId) => API.delete(`/api/posts/${id}/comment/${commentId}`),
+  getMyPostsCount: () => API.get('/api/posts/my-posts/count'),
 }
 
 export const servicesAPI = {
@@ -64,6 +83,7 @@ export const bookingsAPI = {
   getMyBookings: () => API.get('/api/bookings/my-bookings'),
   getById: (id) => API.get(`/api/bookings/${id}`),
   updateStatus: (id, status) => API.put(`/api/bookings/${id}/status`, { status }),
+  update: (id, data) => API.put(`/api/bookings/${id}`, data),
   addReview: (id, reviewData) => API.post(`/api/bookings/${id}/review`, reviewData),
 
   // New method for provider dashboard
@@ -77,6 +97,7 @@ export const marketplaceAPI = {
   update: (id, itemData) => API.put(`/api/marketplace/${id}`, itemData),
   delete: (id) => API.delete(`/api/marketplace/${id}`),
   getMyItems: () => API.get('/api/marketplace/my-items'),
+  getMyItemsCount: () => API.get('/api/marketplace/my-items/count'),
   updateStatus: (id, status) => API.put(`/api/marketplace/${id}/status`, { status }),
 }
 

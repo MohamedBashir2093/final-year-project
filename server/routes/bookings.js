@@ -5,7 +5,8 @@ import {
   getProviderBookings,
   getBooking,
   updateBookingStatus,
-  addBookingReview
+  addBookingReview,
+  updateBooking
 } from '../controllers/bookingController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -18,7 +19,8 @@ router.get('/my-bookings', protect, getMyBookings);
 router.get('/my-services', protect, getProviderBookings);
 
 router.route('/:id')
-  .get(protect, getBooking);
+  .get(protect, getBooking)
+  .put(protect, updateBooking);
 
 router.put('/:id/status', protect, updateBookingStatus);
 router.post('/:id/review', protect, addBookingReview);

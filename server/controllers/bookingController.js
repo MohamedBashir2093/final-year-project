@@ -130,6 +130,38 @@ export const getBooking = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Update booking
+// @route   PUT /api/bookings/:id
+// @access  Private
+export const updateBooking = asyncHandler(async (req, res) => {
+  let booking = await Booking.findById(req.params.id);
+
+  if (!booking) {
+    return res.status(404).json({
+      success: false,
+      message: 'Booking not found'
+    });
+  }
+
+  // Make sure user is booking owner
+  if (booking.user.toString() !== req.user.id) {
+    return res.status(403).json({
+      success: false,
+      message: 'Not authorized to update this booking'
+    });
+  }
+
+  booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: booking
+  });
+});
+
 // @desc    Update booking status
 // @route   PUT /api/bookings/:id/status
 // @access  Private

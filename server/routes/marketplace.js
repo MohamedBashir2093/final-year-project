@@ -6,17 +6,20 @@ import {
   updateMarketplaceItem,
   deleteMarketplaceItem,
   getMyMarketplaceItems,
-  updateItemStatus
+  updateItemStatus,
+  getMyMarketplaceItemsCount
 } from '../controllers/marketplaceController.js';
 import { protect } from '../middleware/auth.js';
+import { upload } from '../middleware/multer.js';
 
 const router = express.Router();
 
 router.route('/')
   .get(getMarketplaceItems)
-  .post(protect, createMarketplaceItem);
+  .post(protect, upload.array('images', 5), createMarketplaceItem);
 
 router.get('/my-items', protect, getMyMarketplaceItems);
+router.get('/my-items/count', protect, getMyMarketplaceItemsCount);
 
 router.route('/:id')
   .get(getMarketplaceItem)

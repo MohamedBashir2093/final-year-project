@@ -111,6 +111,37 @@ export const updatePassword = asyncHandler(async (req, res) => {
   sendTokenResponse(user, 200, res);
 });
 
+// @desc    Update user avatar
+// @route   PUT /api/auth/me/avatar
+// @access  Private
+export const updateAvatar = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please upload a file'
+    });
+  }
+
+  // The path will be relative to the server root, so we need to make it accessible
+  user.avatar = `/uploads/${req.file.filename}`;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    data: user
+  });
+});
+
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   // Create token

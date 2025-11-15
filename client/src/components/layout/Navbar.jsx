@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Menu, X, Home, HeartHandshake, Store, User, LogOut, Calendar, Star, Settings } from 'lucide-react'
+import { Menu,MessageCircle , X, Home, HeartHandshake, Store, User, LogOut, Calendar, Star, Settings } from 'lucide-react'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -10,12 +10,15 @@ const Navbar = () => {
 
   // Different nav items for residents vs service providers
   const navItems = user?.role === 'service_provider' ? [
+    { path: '/provider-dashboard', icon: Home, label: 'Overview' },
     { path: '/provider-dashboard/services', icon: HeartHandshake, label: 'My Services' },
     { path: '/provider-dashboard/bookings', icon: Calendar, label: 'Bookings' },
     { path: '/provider-dashboard/profile', icon: User, label: 'Profile' },
   ] : [
-    { path: '/feed', icon: Home, label: 'Feed' },
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/feed', icon: MessageCircle, label: 'Feed' },
     { path: '/services', icon: HeartHandshake, label: 'Services' },
+    { path: '/bookings', icon: Calendar, label: 'Bookings' },
     { path: '/marketplace', icon: Store, label: 'Marketplace' },
   ]
 
@@ -31,12 +34,22 @@ const Navbar = () => {
               <Home className="w-4 h-4 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Neighborhood
+              Neighbordeep
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            {!user && (
+              <>
+                {/* Public Links */}
+                <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors">Home</Link>
+                <Link to="/about" className="text-gray-600 hover:text-blue-600 transition-colors">About</Link>
+                <Link to="/contact" className="text-gray-600 hover:text-blue-600 transition-colors">Contact</Link>
+                
+              </>
+            )}
+
             {user ? (
               <>
                 {navItems.map((item) => {
@@ -58,13 +71,15 @@ const Navbar = () => {
                 })}
                 
                 <div className="flex items-center space-x-4">
-                  <Link
-                    to="/profile"
-                    className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    <User className="w-4 h-4" />
-                    <span>Profile</span>
-                  </Link>
+                  {user?.role !== 'service_provider' && (
+                    <Link
+                      to="/profile"
+                      className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Profile</span>
+                    </Link>
+                  )}
                   <button
                     onClick={logout}
                     className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-red-600 transition-colors"
@@ -106,8 +121,28 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 animate-slide-up">
+            {!user && (
+              <>
+                {/* Public Links (Mobile) */}
+                <Link
+                  to="/about"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-3 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-3 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  Contact
+                </Link>
+              </>
+            )}
+
             {user ? (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-2 pt-2 border-t border-gray-100">
                 {navItems.map((item) => {
                   const Icon = item.icon
                   return (
@@ -126,14 +161,16 @@ const Navbar = () => {
                     </Link>
                   )
                 })}
-                <Link
-                  to="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-3 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <User className="w-5 h-5" />
-                  <span>Profile</span>
-                </Link>
+                {user?.role !== 'service_provider' && (
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center space-x-3 px-3 py-3 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <User className="w-5 h-5" />
+                    <span>Profile</span>
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     logout()
@@ -146,7 +183,7 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-2 pt-2 border-t border-gray-100">
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}

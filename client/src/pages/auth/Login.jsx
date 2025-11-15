@@ -28,8 +28,12 @@ const Login = () => {
     setError('')
 
     try {
-      await login(formData.email, formData.password)
-      navigate('/feed')
+      const response = await login(formData.email, formData.password);
+      if (response.user.role === 'service_provider') {
+        navigate('/provider-dashboard');
+      } else {
+        navigate('/feed');
+      }
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.')
     } finally {

@@ -16,10 +16,9 @@ const MyServices = () => {
     try {
       const response = await serviceService.getMyServices();
       console.log('API Response:', response);
-      console.log('Response data:', response.data);
-      const servicesData = response.data?.data || response.data || [];
+      const servicesData = Array.isArray(response) ? response : response.data || [];
       console.log('Services data:', servicesData);
-      setServices(Array.isArray(servicesData) ? servicesData : []);
+      setServices(servicesData);
     } catch (error) {
       console.error('Error fetching services:', error);
       setServices([]);
@@ -31,7 +30,7 @@ const MyServices = () => {
   const handleAddService = async (service) => {
     try {
       const newService = await serviceService.createService(service);
-      setServices((prevServices) => [newService.data, ...prevServices]);
+      setServices((prevServices) => [newService, ...prevServices]);
       setAddModalOpen(false);
     } catch (error) {
       console.error('Error adding service:', error);
@@ -44,9 +43,10 @@ const MyServices = () => {
         service._id || service.id,
         service
       );
+
       setServices((prevServices) =>
         prevServices.map((s) =>
-          s._id === updatedService.data._id ? updatedService.data : s
+          (s._id || s.id) === updatedService._id ? updatedService : s
         )
       );
       setEditModalOpen(false);
@@ -69,59 +69,94 @@ const MyServices = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">My Services</h2>
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">My Services</h2>
+          <p className="text-gray-600 mt-2">Manage your service offerings</p>
+        </div>
         <button
           onClick={() => setAddModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200 shadow-md"
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200 shadow-md"
         >
-          Add New Service
+          <span>+</span>
+          <span>Add New Service</span>
         </button>
       </div>
 
       {services.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-6xl mb-4">📋</div>
-          <h3 className="text-xl font-medium text-gray-600 mb-2">No services yet</h3>
-          <p className="text-gray-500">Start by adding your first service to help neighbors in your community.</p>
+        <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="text-gray-400 text-7xl mb-6">🛠️</div>
+          <h3 className="text-2xl font-semibold text-gray-900 mb-3">No services yet</h3>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">Start by adding your first service to help neighbors in your community and earn money doing what you love.</p>
+          <button
+            onClick={() => setAddModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200 shadow-md"
+          >
+            Create Your First Service
+          </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.filter(s => s).map(service => {
-            console.log('Rendering service:', service);
-            return (
-              <div key={service._id || service.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition duration-200 p-6 border border-gray-100">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{service?.title || 'Untitled Service'}</h3>
-                    <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium capitalize">
-                      {service?.category?.replace('_', ' ') || 'Other'}
+        <div className="space-y-6">
+          {services.filter(s => s).map(service => (
+            <div key={service._id || service.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-8 border border-gray-100 group">
+              <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+                <div className="flex-1 mb-4 md:mb-0">
+                  <div className="flex flex-wrap items-center space-x-3 mb-3">
+                    <h3 className="text-2xl font-semibold text-gray-900">{service?.title || 'Untitled Service'}</h3>
+                    {service?.isActive !== false && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 mt-2 sm:mt-0">
+                        ✓ Active
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center space-x-4 mb-4">
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800 capitalize mt-2 sm:mt-0">
+                      📂 {service?.category?.replace('_', ' ') || 'Other'}
+                    </span>
+                    <span className="flex items-center space-x-2 text-gray-600 mt-2 sm:mt-0">
+                      <span>⭐</span>
+                      <span className="font-medium">{service?.rating || 'New'}</span>
+                    </span>
+                    <span className="flex items-center space-x-2 text-gray-600 mt-2 sm:mt-0">
+                      <span>👁️</span>
+                      <span className="font-medium">{service?.views || 0} views</span>
                     </span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-green-600">${service?.price || '0'}</p>
-                    <p className="text-sm text-gray-500 capitalize">{service?.priceType || 'fixed'}</p>
-                  </div>
                 </div>
-                <p className="text-gray-600 mb-4 line-clamp-3">{service?.description || 'No description available'}</p>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => { setCurrentService(service); setEditModalOpen(true); }}
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition duration-200"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleRemoveService(service._id || service.id)}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition duration-200"
-                  >
-                    Remove
-                  </button>
+                <div className="text-left md:text-right">
+                  <p className="text-3xl font-bold text-green-600">
+                    ${service?.price || '0'}
+                    <span className="text-lg font-normal text-gray-500">
+                      {service?.priceType === 'hourly' ? '/hr' : ''}
+                    </span>
+                  </p>
+                  <p className="text-sm text-gray-500 capitalize mt-1">{service?.priceType || 'fixed'}</p>
                 </div>
               </div>
-            );
-          })}
+
+              <div className="mb-6">
+                <p className="text-gray-700 text-base leading-relaxed">{service?.description || 'No description available'}</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                <button
+                  onClick={() => { setCurrentService(service); setEditModalOpen(true); }}
+                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-sm"
+                >
+                  <span>✏️</span>
+                  <span>Edit Service</span>
+                </button>
+                <button
+                  onClick={() => handleRemoveService(service._id || service.id)}
+                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-sm"
+                >
+                  <span>🗑️</span>
+                  <span>Remove Service</span>
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -150,6 +185,7 @@ const ServiceFormModal = ({ onClose, onSave, service }) => {
 
     try {
       const serviceData = {
+        ...(service?._id ? { _id: service._id } : {}), // keep ID for editing
         title,
         category,
         description,
@@ -279,4 +315,3 @@ const ServiceFormModal = ({ onClose, onSave, service }) => {
 };
 
 export default MyServices;
-

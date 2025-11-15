@@ -48,7 +48,18 @@ export const getPost = asyncHandler(async (req, res) => {
 // @route   POST /api/posts
 // @access  Private
 export const createPost = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'resident') {
+    return res.status(403).json({
+      success: false,
+      message: 'Only residents can create posts'
+    });
+  }
+
   req.body.author = req.user.id;
+
+  if (req.file) {
+    req.body.image = `/uploads/${req.file.filename}`;
+  }
 
   const post = await Post.create(req.body);
 
@@ -198,19 +209,27 @@ export const addComment = asyncHandler(async (req, res) => {
     });
   }
 
+  // Create new comment with timestamp
   const newComment = {
     user: req.user.id,
-    text
+    text,
+    createdAt: new Date()
   };
 
+  // Add the new comment to the beginning
   post.comments.unshift(newComment);
   await post.save();
 
-  await post.populate('comments.user', 'name avatar');
+  // Populate only the user of the new comment
+  const populatedPost = await post.populate({
+    path: 'comments.user',
+    select: 'name avatar'
+  });
 
+  // Send only the newly added comment to frontend
   res.status(200).json({
     success: true,
-    data: post.comments
+    data: populatedPost.comments[0]
   });
 });
 
@@ -238,6 +257,7 @@ export const deleteComment = asyncHandler(async (req, res) => {
       success: false,
       message: 'Comment not found'
     });
+    
   }
 
   // Make sure user is comment owner
@@ -257,5 +277,17 @@ export const deleteComment = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: post.comments
+  });
+});
+
+// @desc    Get count of posts by current user
+// @route   GET /api/posts/my-posts/count
+// @access  Private
+export const getMyPostsCount = asyncHandler(async (req, res) => {
+  const count = await Post.countDocuments({ author: req.user.id });
+
+  res.status(200).json({
+    success: true,
+    data: count
   });
 });

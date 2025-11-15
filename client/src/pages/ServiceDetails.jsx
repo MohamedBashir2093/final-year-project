@@ -48,7 +48,7 @@ const ServiceDetails = () => {
 
       await bookingsAPI.create(bookingPayload)
       alert('Booking request sent successfully!')
-      navigate('/my-bookings')
+      navigate('/bookings')
     } catch (error) {
       console.error('Error creating booking:', error)
       alert('Error booking service: ' + (error.message || 'Please try again'))
@@ -95,7 +95,7 @@ const ServiceDetails = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-start space-x-6">
           <img
-            src={service.provider?.avatar || `https://ui-avatars.com/api/?name=${service.provider?.name}&background=3B82F6&color=fff`}
+            src={service.provider?.avatar ? `http://localhost:5000${service.provider.avatar}` : `https://ui-avatars.com/api/?name=${service.provider?.name}&background=3B82F6&color=fff`}
             alt={service.provider?.name}
             className="w-20 h-20 rounded-full"
           />
