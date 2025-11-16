@@ -13,6 +13,7 @@ import Footer from './components/Footer' // Import Footer
 import Home from './pages/Home'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
+import ResetPassword from './pages/auth/ResetPassword'
 import Services from './pages/Services'
 import Marketplace from './pages/Marketplace'
 import MarketplaceItemDetails from './pages/MarketplaceItemDetails'
@@ -23,6 +24,7 @@ import ServiceDetails from './pages/ServiceDetails'
 import EditMarketplaceItem from './pages/EditMarketplaceItem'
 import About from './pages/About' // Import About
 import Contact from './pages/Contact' // Import Contact
+
 
 function App() {
   return (
@@ -36,6 +38,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/reset-password" element={<ResetPassword />} /> {/* New Route */}
                 <Route path="/about" element={<About />} /> {/* New Route */}
                 <Route path="/contact" element={<Contact />} /> {/* New Route */}
                 

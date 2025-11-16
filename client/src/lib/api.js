@@ -1,9 +1,12 @@
 import axios from 'axios'
 
+
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL, // uses .env value
-  withCredentials: true,                  // optional, if using cookies
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
 });
+ 
+console.log("API URL:", import.meta.env.VITE_API_URL);
 
 // Request interceptor to add auth token
 API.interceptors.request.use((config) => {
@@ -32,6 +35,7 @@ export const authAPI = {
   getProfile: () => API.get('/api/auth/me'), // Fixed: Changed from /profile to /me
   updateDetails: (userData) => API.put('/api/auth/updatedetails', userData),
   updatePassword: (passwordData) => API.put('/api/auth/updatepassword', passwordData),
+  resetPassword: (data) => API.post('/api/auth/reset-password', data),
   updateAvatar: (file) => {
     const formData = new FormData();
     formData.append('avatar', file);

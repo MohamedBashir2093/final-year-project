@@ -142,6 +142,40 @@ export const updateAvatar = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Reset password
+// @route   POST /api/auth/reset-password
+// @access  Public
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide an email and new password'
+    });
+  }
+
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user) {
+    // Return a generic success message to prevent email enumeration
+    return res.status(200).json({
+      success: true,
+      message: 'If an account with that email exists, the password has been reset.'
+    });
+  }
+
+  // Set new password
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Password reset successful. Please log in.'
+  });
+});
+
+
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   // Create token

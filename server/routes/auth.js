@@ -5,7 +5,8 @@ import {
   getMe,
   updateDetails,
   updatePassword,
-  updateAvatar
+  updateAvatar,
+  resetPassword
 } from '../controllers/authController.js';
 import { protect } from '../middleware/auth.js';
 import { upload } from '../middleware/multer.js';
@@ -18,5 +19,6 @@ router.get('/me', protect, getMe);
 router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePassword);
 router.put('/me/avatar', protect, upload.single('avatar'), updateAvatar);
+router.post('/reset-password', resetPassword);
 
 export default router;
