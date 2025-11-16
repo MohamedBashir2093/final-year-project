@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename);
 // Middleware
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  origin: 'https://final-year-project-diswmcpwb-arafatbashir093-gmailcoms-projects.vercel.app',
   credentials: true
 }));
 
